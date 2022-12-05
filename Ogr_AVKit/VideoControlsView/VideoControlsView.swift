@@ -33,8 +33,6 @@ class VideoControlsView: UIView {
 
     @IBOutlet var backBTN: UIButton!
     @IBOutlet var forBTN: UIButton!
-    @IBOutlet var leftTapArea: UIView!
-    @IBOutlet var rightTapArea: UIView!
     
     @IBOutlet var allView: UIView!
     @IBOutlet var playedTimeLabel: UILabel!
@@ -52,11 +50,10 @@ class VideoControlsView: UIView {
         backBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
         forBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
         playPauseButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
-        createDoubleCheckTapGesture()
     }
 
     func updateVideoPlayerSlider() {
-        if let currentItem = player?.currentItem {
+        if let currentItem = player.currentItem {
             let duration = currentItem.duration
             if CMTIME_IS_INVALID(duration) || duration.value == 0 { return;}
             let currentTime = currentItem.currentTime()
@@ -74,26 +71,10 @@ class VideoControlsView: UIView {
     private func checkStop(current: Float64, duration: Float64){
         print("current:\(current)  duration:\(duration) ")
         if current.isEqual(to: duration), duration != 0 {
-            player = nil
             viewController?.video.resetTime()
+            stopVideo()
             viewController?.popThePage()
         }
-    }
-
-    private func timeIntervalToString(durationTime: TimeInterval) -> String {
-        let minutes = Int(durationTime) / 60
-        let seconds = Int(durationTime) % 60
-
-        var minStr: String = "\(minutes)"
-        if minutes < 10{
-            minStr = "0\(minutes)"
-        }
-        var secStr: String = "\(seconds)"
-        if seconds < 10{
-            secStr = "0\(seconds)"
-        }
-        let videoDuration = "\(minStr):\(secStr)"
-        return videoDuration
     }
 
     @IBAction func playPauseButtonTapped(_ sender: Any) {
@@ -119,41 +100,22 @@ class VideoControlsView: UIView {
 
     @IBAction func closeButtonTapped(_ sender: Any) {
         print(#function)
-        player = nil
+        player.replaceCurrentItem(with: nil)
+        stopVideo()
         viewController?.popThePage()
     }
-
-//    MARK: DoubleTap Management(time jump) when Controller UI Opened
-
-    private func createDoubleCheckTapGesture(){
-        let rightTap = UITapGestureRecognizer(target: self, action: #selector(jumpForward))
-        rightTap.numberOfTapsRequired = 2
-        viewController?.tap.require(toFail: rightTap)
-        rightTapArea.addGestureRecognizer(rightTap)
-
-        let leftTap = UITapGestureRecognizer(target: self, action: #selector(jumpBackward))
-        leftTap.numberOfTapsRequired = 2
-        viewController?.tap.require(toFail: leftTap)
-        leftTapArea.addGestureRecognizer(leftTap)
-    }
-
+    
     @IBAction func backwardButtonTapped(_ sender: Any) {
         print(#function)
-        jumpBackward()
-    }
-    @objc func jumpBackward(){
         changeSeekTime(jump: -10)
         backBTN.isHighlighted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
             backBTN.isHighlighted = false
         }
     }
-
+    
     @IBAction func forwardButtonTapped(_ sender: Any) {
         print(#function)
-        jumpForward()
-    }
-    @objc func jumpForward(){
         changeSeekTime(jump: 10)
         forBTN.isHighlighted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
@@ -179,5 +141,28 @@ class VideoControlsView: UIView {
 extension AVPlayer {
     var isPlaying: Bool {
         return rate != 0 && error == nil
+    }
+}
+
+extension VideoControlsView {
+    private func timeIntervalToString(durationTime: TimeInterval) -> String {
+        let minutes = Int(durationTime) / 60
+        let seconds = Int(durationTime) % 60
+
+        var minStr: String = "\(minutes)"
+        if minutes < 10{
+            minStr = "0\(minutes)"
+        }
+        var secStr: String = "\(seconds)"
+        if seconds < 10{
+            secStr = "0\(seconds)"
+        }
+        let videoDuration = "\(minStr):\(secStr)"
+        return videoDuration
+    }
+    
+    private func stopVideo() {
+        viewController?.player = nil
+        player = nil
     }
 }
