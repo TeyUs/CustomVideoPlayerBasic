@@ -28,7 +28,7 @@ class VideoControlsView: UIView {
     }
 
     var viewController: VideoScreenViewController?
-    var player: AVPlayer!
+    var player: AVPlayer?
     var is_start = true
 
     @IBOutlet var backBTN: UIButton!
@@ -44,16 +44,23 @@ class VideoControlsView: UIView {
         viewController = delegate
         self.player = player
         let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        _ = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main, using: { elapsedTime in
-            self.updateVideoPlayerSlider()
-        })
+//        playerTimeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main, using: { elapsedTime in
+//            self.updateVideoPlayerSlider()
+//        })
+        player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main) { (CMTime) -> Void in
+             if self.player?.currentItem?.status == .readyToPlay {
+//                 let time : Float64 = CMTimeGetSeconds(self.player!.currentTime());
+//                 self.playbackSlider!.value = Float ( time );
+                 self.updateVideoPlayerSlider()
+             }
+         }
         backBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
         forBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
         playPauseButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
     }
 
     func updateVideoPlayerSlider() {
-        if let currentItem = player.currentItem {
+        if let currentItem = player?.currentItem {
             let duration = currentItem.duration
             if CMTIME_IS_INVALID(duration) || duration.value == 0 { return;}
             let currentTime = currentItem.currentTime()
@@ -80,12 +87,12 @@ class VideoControlsView: UIView {
     @IBAction func playPauseButtonTapped(_ sender: Any) {
         print(#function)
         guard let btn:UIButton = sender as? UIButton else { return }
-        if !player.isPlaying {
+        if player?.isPlaying == true {
             btn.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-            player.play()
+            player?.play()
         } else {
             btn.setImage(UIImage(systemName: "play.fill"), for: .normal)
-            player.pause()
+            player?.pause()
         }
     }
 
@@ -100,7 +107,7 @@ class VideoControlsView: UIView {
 
     @IBAction func closeButtonTapped(_ sender: Any) {
         print(#function)
-        player.replaceCurrentItem(with: nil)
+        player?.replaceCurrentItem(with: nil)
         stopVideo()
         viewController?.popThePage()
     }
