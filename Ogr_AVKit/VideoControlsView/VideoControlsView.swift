@@ -44,13 +44,8 @@ class VideoControlsView: UIView {
         viewController = delegate
         self.player = player
         let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-//        playerTimeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main, using: { elapsedTime in
-//            self.updateVideoPlayerSlider()
-//        })
         player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main) { (CMTime) -> Void in
-             if self.player?.currentItem?.status == .readyToPlay {
-//                 let time : Float64 = CMTimeGetSeconds(self.player!.currentTime());
-//                 self.playbackSlider!.value = Float ( time );
+            if self.player?.currentItem?.status == .readyToPlay {
                  self.updateVideoPlayerSlider()
              }
          }

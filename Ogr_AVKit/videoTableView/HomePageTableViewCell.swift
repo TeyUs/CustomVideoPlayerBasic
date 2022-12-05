@@ -25,18 +25,25 @@ class HomePageTableViewCell: UITableViewCell {
     func prepareCell(video: Video){
         let videoURL = URL(string: video.url)
         let asset = AVAsset(url: videoURL!)
-
+        
+        //MARK: ProgressView on Cells
+        if #available(iOS 15.0, *) {
+            asset.loadMetadata(for: .unknown) {[weak self] _, _ in
+                DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
+                    let duration = asset.duration
+                    if CMTIME_IS_INVALID(duration) || duration.value == 0 { return }
+                    print(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)))
+                    self?.progressView.setProgress(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)), animated: true)
+                }
+            }
+        } else {
+            self.progressView.setProgress(Float(CMTimeGetSeconds(CMTimeMake(value: 0, timescale: 1)) / CMTimeGetSeconds(CMTimeMake(value: 1, timescale: 1))), animated: true)
+        }
+        
         nameLabel.text = video.name
 
         let imageUrl = URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/\(video.imageUrl)")
         imageV.kf.setImage(with: imageUrl)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [self] in
-            let duration = asset.duration
-            if CMTIME_IS_INVALID(duration) || duration.value == 0 { return }
-            print(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)))
-            progressView.setProgress(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)), animated: true)
-        }
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
