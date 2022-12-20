@@ -31,8 +31,8 @@ class VideoControlsView: UIView {
     var player: AVPlayer?
     var is_start = true
 
-    @IBOutlet var backBTN: UIButton!
-    @IBOutlet var forBTN: UIButton!
+    @IBOutlet var backwardButton: UIButton!
+    @IBOutlet var forwardButton: UIButton!
     
     @IBOutlet var allView: UIView!
     @IBOutlet var playedTimeLabel: UILabel!
@@ -43,46 +43,46 @@ class VideoControlsView: UIView {
     func prepareScreenElements(delegate: VideoScreenViewController, player: AVPlayer) {
         viewController = delegate
         self.player = player
-        let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main) { (CMTime) -> Void in
-            if self.player?.currentItem?.status == .readyToPlay {
-                 self.updateVideoPlayerSlider()
+        player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1),
+                                       queue: DispatchQueue.main) { [weak self] _ in
+            if player.currentItem?.status == .readyToPlay {
+                self?.updateVideoPlayerSlider()
              }
          }
-        backBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
-        forBTN.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
+        setButtonsImages() //just about UI
+    }
+    
+    func setButtonsImages() {
+        backwardButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
+        forwardButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
         playPauseButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 50), forImageIn: .normal)
     }
-
+    
     func updateVideoPlayerSlider() {
         if let currentItem = player?.currentItem {
             let duration = currentItem.duration
-            if CMTIME_IS_INVALID(duration) || duration.value == 0 { return;}
+            if CMTIME_IS_INVALID(duration) || duration.value == 0 { return }
             let currentTime = currentItem.currentTime()
+            
             scrubber.value = Float(CMTimeGetSeconds(currentTime) / CMTimeGetSeconds(duration))
+            
             playedTimeLabel.text = timeIntervalToString(durationTime: CMTimeGetSeconds(currentTime))
-            if is_start {
-                totalTimeLabel.text = timeIntervalToString(durationTime: CMTimeGetSeconds(duration))
-                is_start = false
+            
+            if CMTimeGetSeconds(currentTime).isEqual(to: CMTimeGetSeconds(duration)) {
+                stopVideo(current: 0)
             }
-            viewController?.video.lastDuration = currentTime
-            checkStop(current: CMTimeGetSeconds(currentTime), duration: CMTimeGetSeconds(duration))
+            
+            if is_start {
+                is_start = false
+                totalTimeLabel.text = timeIntervalToString(durationTime: CMTimeGetSeconds(duration))
+            }
         }
     }
-
-    private func checkStop(current: Float64, duration: Float64){
-        print("current:\(current)  duration:\(duration) ")
-        if current.isEqual(to: duration), duration != 0 {
-            viewController?.video.resetTime()
-            stopVideo()
-            viewController?.popThePage()
-        }
-    }
-
+    
     @IBAction func playPauseButtonTapped(_ sender: Any) {
         print(#function)
         guard let btn:UIButton = sender as? UIButton else { return }
-        if player?.isPlaying == true {
+        if player?.isPlaying == false {
             btn.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             player?.play()
         } else {
@@ -102,26 +102,24 @@ class VideoControlsView: UIView {
 
     @IBAction func closeButtonTapped(_ sender: Any) {
         print(#function)
-        player?.replaceCurrentItem(with: nil)
         stopVideo()
-        viewController?.popThePage()
     }
     
     @IBAction func backwardButtonTapped(_ sender: Any) {
         print(#function)
         changeSeekTime(jump: -10)
-        backBTN.isHighlighted = true
+        backwardButton.isHighlighted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
-            backBTN.isHighlighted = false
+            backwardButton.isHighlighted = false
         }
     }
     
     @IBAction func forwardButtonTapped(_ sender: Any) {
         print(#function)
         changeSeekTime(jump: 10)
-        forBTN.isHighlighted = true
+        forwardButton.isHighlighted = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
-            forBTN.isHighlighted = false
+            forwardButton.isHighlighted = false
         }
     }
 
@@ -163,8 +161,17 @@ extension VideoControlsView {
         return videoDuration
     }
     
-    private func stopVideo() {
-        viewController?.player = nil
-        player = nil
+    private func stopVideo(current: Float64? = nil) {
+        viewController?.video.lastDuration = Float(current ?? getCurrentTime())
+        //player = nil
+        player?.replaceCurrentItem(with: nil)
+        viewController?.popThePage()
+    }
+    
+    private func getCurrentTime() -> Float64 {
+        if let currentItem = player?.currentItem {
+            return Float64(CMTimeGetSeconds(currentItem.currentTime()))
+        }
+        return 0
     }
 }

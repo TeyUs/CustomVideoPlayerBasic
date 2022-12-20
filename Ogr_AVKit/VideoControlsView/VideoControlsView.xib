@@ -13,8 +13,8 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="VideoControlsView" customModule="Ogr_AVKit" customModuleProvider="target">
             <connections>
                 <outlet property="allView" destination="iN0-l3-epB" id="mOg-Ul-lYp"/>
-                <outlet property="backBTN" destination="PwW-B8-0EH" id="8oG-ad-hZD"/>
-                <outlet property="forBTN" destination="1rz-un-XNB" id="VlO-3U-kxM"/>
+                <outlet property="backwardButton" destination="PwW-B8-0EH" id="8oG-ad-hZD"/>
+                <outlet property="forwardButton" destination="1rz-un-XNB" id="VlO-3U-kxM"/>
                 <outlet property="playPauseButton" destination="Kz1-e4-M7f" id="Vqg-7A-kej"/>
                 <outlet property="playedTimeLabel" destination="Gsr-Jb-uGL" id="aeE-2E-HxN"/>
                 <outlet property="scrubber" destination="rvo-wF-e9N" id="hSL-qO-x9Y"/>

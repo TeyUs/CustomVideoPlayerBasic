@@ -77,6 +77,7 @@
 		2E9452A72899C7B9006CFF25 /* Ogr_AVKit */ = {
 			isa = PBXGroup;
 			children = (
+				2E43DDC728A0156C008D6ED2 /* VideoScreenViewController.swift */,
 				2E70582B28BA90CF0087B6A5 /* VideoControlsView */,
 				2E9452BC2899DC9C006CFF25 /* videoTableView */,
 				2E9452A82899C7B9006CFF25 /* AppDelegate.swift */,
@@ -85,7 +86,6 @@
 				2E9452B12899C7C1006CFF25 /* Assets.xcassets */,
 				2E9452B32899C7C1006CFF25 /* LaunchScreen.storyboard */,
 				2E9452B62899C7C1006CFF25 /* Info.plist */,
-				2E43DDC728A0156C008D6ED2 /* VideoScreenViewController.swift */,
 				2E94CF8728C7855F00C359DD /* Video.swift */,
 			);
 			path = Ogr_AVKit;

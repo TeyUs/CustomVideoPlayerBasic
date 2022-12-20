@@ -8,14 +8,14 @@
 import Foundation
 import CoreMedia
 
-class Video{
+class Video {
     let url: String
     let name: String
     let imageUrl: String
-    var lastDuration: CMTime {
-        get{
+    var lastDuration: Float {
+        get {
             getTime()
-        }set{
+        } set {
             saveTime(time: newValue)
         }
     }
@@ -32,20 +32,22 @@ var videos: [Video] = [Video(url: "http://commondatastorage.googleapis.com/gtv-v
                        Video(url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", name: "For Bigger Blazes", imageUrl: "images/ForBiggerBlazes.jpg")]
 
 extension Video{
-    private func getTime() -> CMTime{
-        let time = UserDefaults.standard.integer(forKey: self.name)
-        let cmTime = CMTimeMake(value: Int64(time), timescale: 1)
-        if CMTIME_IS_INVALID(cmTime){
-            return CMTimeMake(value: 0, timescale: 1)
+    private func getTime() -> Float{
+        let time = UserDefaults.standard.float(forKey: self.name)
+        if CMTIME_IS_INVALID(time.asCMTime()) {
+            return 0
+        }else {
+            return time
         }
-        return cmTime
     }
 
-    private func saveTime(time: CMTime){
-        UserDefaults.standard.set(CMTimeGetSeconds(time), forKey: self.name)
+    private func saveTime(time: Float){
+        UserDefaults.standard.set(time, forKey: self.name)
     }
+}
 
-    func resetTime(){
-        self.lastDuration = CMTimeMake(value: 0, timescale: 1)
+extension Float {
+    func asCMTime() -> CMTime {
+        return CMTimeMake(value: Int64(self), timescale: 1)
     }
 }

@@ -26,18 +26,18 @@ class HomePageTableViewCell: UITableViewCell {
         let videoURL = URL(string: video.url)
         let asset = AVAsset(url: videoURL!)
         
-        //MARK: ProgressView on Cells
+        //MARK: Only ProgressView on Cells
         if #available(iOS 15.0, *) {
             asset.loadMetadata(for: .unknown) {[weak self] _, _ in
                 DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
                     let duration = asset.duration
                     if CMTIME_IS_INVALID(duration) || duration.value == 0 { return }
-                    print(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)))
-                    self?.progressView.setProgress(Float(CMTimeGetSeconds(video.lastDuration) / CMTimeGetSeconds(duration)), animated: true)
+                    print( video.lastDuration / Float(CMTimeGetSeconds(duration)))
+                    self?.progressView.setProgress(video.lastDuration / Float(CMTimeGetSeconds(duration)), animated: true)
                 }
             }
         } else {
-            self.progressView.setProgress(Float(CMTimeGetSeconds(CMTimeMake(value: 0, timescale: 1)) / CMTimeGetSeconds(CMTimeMake(value: 1, timescale: 1))), animated: true)
+            self.progressView.setProgress(0, animated: true)
         }
         
         nameLabel.text = video.name

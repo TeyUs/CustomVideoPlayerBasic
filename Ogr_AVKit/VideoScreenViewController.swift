@@ -10,11 +10,9 @@ import AVKit
 import AVFoundation
 
 class VideoScreenViewController: UIViewController {
-    var player: AVPlayer!
+    
     var videoController: VideoControlsView!
-    var asset: AVAsset!
-    var video:Video!
-    var tap: UITapGestureRecognizer!
+    var video: Video!
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask { return .landscapeRight }
     
@@ -24,15 +22,16 @@ class VideoScreenViewController: UIViewController {
     }
     
     func setupPlayer(){
-        player = AVPlayer(url: URL(string: video.url)!)
-        player.seek(to: video.lastDuration)
+        let player = AVPlayer(url: URL(string: video.url)!)
+        player.seek(to: video.lastDuration.asCMTime())
         let playerLayer = AVPlayerLayer(player: player)
-        playerLayer.frame = CGRect(x: 0, y: 0 , width: (self.view.frame.height), height: (self.view.frame.width))
+        playerLayer.frame = CGRect(x: 0, y: 0, width: (self.view.frame.height),
+                                   height: (self.view.frame.width))
         view.backgroundColor = .black
         self.view.layer.addSublayer(playerLayer)
         player.play()
         
-        tap = UITapGestureRecognizer(target: self, action: #selector(self.touchedScreen(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.touchedScreen(_:)))
         self.view.addGestureRecognizer(tap)
         
         videoController = VideoControlsView()
